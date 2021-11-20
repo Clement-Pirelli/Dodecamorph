@@ -2,7 +2,7 @@
 
 Dodecamorph is an esoteric programming language inspired by brainfuck, befunge and others. I got the idea while watching this [video on esolangs](https://www.youtube.com/watch?v=cQ7bcCrJMHc).
 
-Here's the spec of the language:
+Here's the spec of the language, TLDR data is laid out as N-dimensional, lazily growing arrays, instructions are data, there are 12 instructions and 2 special values
 
 ```
 Starting conditions:
