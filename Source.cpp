@@ -1,42 +1,20 @@
-#include <iostream>
 #include <string>
-#include <sstream>
 #include <type_traits>
 #include "ArgumentParser.h"
 #include "Tensor.h"
+#include "Cell.h"
+#include "InputFileParser.h"
 #include "Dependencies/Files.h"
 #include "Dependencies/Logger/Logger.h"
 
-struct OpeningParens {};
-struct ClosingParens {};
 
-enum Instruction : int
-{
-	OutputCurrentData = 0,
-	IncrementDataCursorCellIndex = 1,
-	SetDataCursorTensorIndex = 2,
-	IncrementDataCell = 3,
-	DecrementDataCell = 4,
-	SetInstructionCursorDirection = 5,
-	SetDataCellUserInput = 6,
-	ConditionalSetInstructionCursorCellIndex = 7,
-	SetDataCellOpeningParens = 8,
-	SetDataCellClosingParens = 9,
-	SetInstructionCursorTensorIndex = 10,
-	ShrinkTensor = 11,
-	InstructionCount
-};
-
-enum Direction : unsigned char 
+enum Direction : unsigned char
 {
 	Neutral = 0,
 	Incremental = 1,
 	Decremental = 2,
 	DirectionCount
 };
-
-using Cell = std::variant<int, OpeningParens, ClosingParens>;
-
 
 struct Cursor
 {
@@ -74,75 +52,14 @@ Cell& get_current_instruction_cell()
 bool initial_setup(const Arguments::ParseResult& parseResult)
 {
 	FileReader reader = FileReader(parseResult.inputPath);
-	std::string cells = reader.readInto<std::string>();
-
-	//crlf annoyance
-	for (std::string::size_type carriage_return_pos = cells.find("\r\n"); carriage_return_pos != std::string::npos; carriage_return_pos = cells.find("\r\n"))
+	std::string read = reader.readInto<std::string>();
+	if(std::optional<Tensor<Cell>> maybe_result = InputFile::parse(std::move(read)))
 	{
-		cells.erase(carriage_return_pos, 1);
+		get_instruction_tensor() = std::move(maybe_result).value();
+		return true;
 	}
 
-	Tensor<Cell> &instruction_tensor = get_instruction_tensor();
-	std::vector<int> coords = { 0 };
-
-	std::string line;
-	std::string token;
-
-	std::stringstream cellsStream(cells);
-	for (int y = 0; std::getline(cellsStream, line, '\n'); y++)
-	{
-		std::stringstream line_stream(line);
-
-		int x = 0;
-		while (line_stream >> token)
-		{
-			if (token.starts_with('/')) //comments
-			{
-				y--;
-				break;
-			}
-
-			coords[0] = x;
-
-			if (y != 0)
-			{
-				if (coords.size() == 1)
-				{
-					coords.push_back(y);
-				}
-				else
-				{
-					coords[1] = y;
-				}
-			}
-			
-			//todo: allow custom strings for instructions on top of the numbers?
-			if (token.compare("(") == 0)
-			{
-				instruction_tensor.setAtCoordinates(coords, OpeningParens{});
-			}
-			else if (token.compare(")") == 0)
-			{
-				instruction_tensor.setAtCoordinates(coords, ClosingParens{});
-			}
-			else
-			{
-				try
-				{
-					instruction_tensor.setAtCoordinates(coords, std::stoi(token));
-				}
-				catch (...)
-				{
-					Logger::LogErrorFormatted("Initial state parsing: could not parse cell at row %u, column %u. Instead, found '%s'", x, y, token.c_str());
-					return false;
-				}
-			}
-
-			x++;
-		}
-	}
-
-	return true;
+	return false;
 }
 
 Coordinates next_index_for(Coordinates index) 
