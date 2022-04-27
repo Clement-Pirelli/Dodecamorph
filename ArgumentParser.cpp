@@ -31,7 +31,9 @@ namespace
 
 	void outputHelp()
 	{
-		Logger::LogMessage("-i <your input file here> -o <your optional output file here>");
+		Logger::LogMessage("-i: required, the path of the input file");
+		Logger::LogMessage("-o: optional, the path of the output file. If not supplied, output will be to stdout");
+		Logger::LogMessage("-w: optional, the path of the words file, which maps instructions to words.");
 	}
 }
 namespace Arguments 
@@ -47,12 +49,14 @@ namespace Arguments
 
 		const auto inputPath = findString(args, "-i");
 		const auto outputPath = findString(args, "-o");
+		const auto wordsPath = findString(args, "-w");
 		if (inputPath.has_value())
 		{
 			const ParseResult result
 			{
 				.inputPath = inputPath.value(),
-				.outputPath = outputPath.value_or("")
+				.outputPath = outputPath.value_or(""),
+				.wordsPath = wordsPath.value_or("")
 			};
 
 			return result;

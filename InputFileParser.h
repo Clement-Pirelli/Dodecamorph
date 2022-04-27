@@ -6,6 +6,6 @@
 
 namespace InputFile
 {
-	std::optional<Tensor<Cell>> parse(std::string contents);
+	std::optional<Tensor<Cell>> parse(std::string contents, std::string words);
 }
 

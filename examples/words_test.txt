@@ -1,0 +1,12 @@
+output
+move
+warp
+incr
+decr
+dir
+ask
+cond
+open
+close
+jump
+shrink

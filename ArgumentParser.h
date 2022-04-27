@@ -9,6 +9,7 @@ namespace Arguments
 	{
 		std::string inputPath;
 		std::string outputPath;
+		std::string wordsPath;
 	};
 
 	std::optional<ParseResult> parse(std::span<const char*> args);

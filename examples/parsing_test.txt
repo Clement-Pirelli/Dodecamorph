@@ -1,2 +1,2 @@
-  2 ( ) 1 ( 0 1 ) 0 1 ( 1 ) 0 1 ( 1 ) 0 1 ( 1 ) 0 1 ( 1 ) 0 5 ( )
+  warp ( ) move ( 0 1 ) output move ( 1 ) output move ( 1 ) output move ( 1 ) output move ( 1 ) output dir ( )
   72 101 108 108 111

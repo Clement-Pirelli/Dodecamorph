@@ -51,9 +51,23 @@ Cell& get_current_instruction_cell()
 
 bool initial_setup(const Arguments::ParseResult& parseResult)
 {
-	FileReader reader = FileReader(parseResult.inputPath);
-	std::string read = reader.readInto<std::string>();
-	if(std::optional<Tensor<Cell>> maybe_result = InputFile::parse(std::move(read)))
+	auto read_input = [&]()
+	{
+		FileReader reader = FileReader(parseResult.inputPath);
+		return reader.readInto<std::string>();
+	};
+
+	auto read_words = [&]()
+	{
+		if(parseResult.wordsPath.empty())
+		{
+			return std::string();
+		}
+		FileReader reader = FileReader(parseResult.wordsPath);
+		return reader.readInto<std::string>();
+	};
+
+	if(auto maybe_result = InputFile::parse(read_input(), read_words()))
 	{
 		get_instruction_tensor() = std::move(maybe_result).value();
 		return true;
