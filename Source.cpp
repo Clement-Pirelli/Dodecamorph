@@ -168,7 +168,8 @@ std::optional<PairParensReturn> pair_parens(const Coordinates& opening_parens_in
 template<typename Operation_t>
 bool pair_parens_and_execute(const Operation_t& operation) 
 {
-	std::optional<PairParensReturn> found_paired_parens = pair_parens(next_index_for(instruction_cursor.cell_index));
+	Coordinates next = next_index_for(instruction_cursor.cell_index);
+	std::optional<PairParensReturn> found_paired_parens = pair_parens(next);
 	if (found_paired_parens.has_value())
 	{
 		if constexpr (std::is_invocable_r<bool, Operation_t, PairParensReturn>())
@@ -183,7 +184,16 @@ bool pair_parens_and_execute(const Operation_t& operation)
 	}
 	else
 	{
-		return false;
+		PairParensReturn implied_empty = { next, {} };
+		if constexpr (std::is_invocable_r<bool, Operation_t, PairParensReturn>())
+		{
+			return operation(implied_empty);
+		}
+		else
+		{
+			operation(implied_empty);
+			return true;
+		}
 	}
 }
 
@@ -232,7 +242,7 @@ bool execute_instruction(const Instruction instruction)
 		}
 		else
 		{
-			std::get<0>(cell) = 0;
+			cell = 0;
 		}
 	}
 	break;
@@ -245,7 +255,7 @@ bool execute_instruction(const Instruction instruction)
 		}
 		else
 		{
-			std::get<0>(cell) = 0;
+			cell = 0;
 		}
 	}
 	break;
@@ -312,7 +322,7 @@ bool execute_instruction(const Instruction instruction)
 	break;
 	}
 
-	return true;
+	return succeeded;
 }
 
 
